@@ -1,5 +1,6 @@
-#include "optional.hh"
+#include "option.hh"
 #include <stdexcept>
+#include <string>
 
 namespace results {
 

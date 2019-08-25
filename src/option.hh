@@ -1,6 +1,8 @@
 #pragma once
+
 #include <optional>
 #include <string_view>
+#include <type_traits>
 
 namespace results {
 
@@ -40,28 +42,37 @@ public:
     }
 
     template <typename F>
-    auto and_then(F && f) const -> option<decltype(f(T()))> {
-        using U = decltype(f(T()));
+    auto and_then(F && f) const -> option<decltype(f(unwrap()))> {
+        using U = decltype(f(unwrap()));
         if (is_none()) {
             return option<U>();
         }
         return option<U>(f(*d_value));
+    }
+
+    template <typename F1, typename F2>
+    auto match(F1 && on_some, F2 && on_none) -> decltype(on_some(unwrap())) {
+        static_assert(std::is_constructible<decltype(on_none()), decltype(on_some(unwrap()))>::value,
+                      "return value of on_none() must be equal or convertible to the return value of on_some()");
+
+        if (is_some()) {
+            return on_some(*d_value);
+        }
+        return on_none();
     }
 private:
     std::optional<T> d_value;
 };
 
 template <typename T>
-option <T> none() {
-    return option<T>();
+option<std::decay_t<T>> make_none() {
+    return option<std::decay_t<T>>();
 }
 
-template <typename T>
-option <T> some(T value) {
-    return option<T>(std::move(value));
+template <typename T, typename... Args>
+option<std::decay_t<T>> make_some(Args&&... args) {
+    return option<std::decay_t<T>>(T(std::forward<Args>(args)...));
 }
-
-auto visit(visit)
 
 }
 

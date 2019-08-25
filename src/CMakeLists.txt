@@ -1,6 +1,6 @@
 add_library(results
-    optional.hh
-    optional.cc
+    option.hh
+    option.cc
 )
 
 target_include_directories(results PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
