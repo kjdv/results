@@ -7,6 +7,10 @@ namespace results {
 // todo: move to dedicated file/namespace
 [[noreturn]] void panic(std::string_view msg);
 
+// c++17 magic...
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
 template <typename T>
 class option {
 public:
@@ -43,7 +47,6 @@ public:
         }
         return option<U>(f(*d_value));
     }
-
 private:
     std::optional<T> d_value;
 };
@@ -57,6 +60,8 @@ template <typename T>
 option <T> some(T value) {
     return option<T>(std::move(value));
 }
+
+auto visit(visit)
 
 }
 
