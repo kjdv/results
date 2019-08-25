@@ -1,5 +1,6 @@
 add_executable(results_test
   option.cc
+  result.cc
 )
 target_link_libraries(results_test results gtest)
 
