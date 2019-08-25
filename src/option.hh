@@ -23,6 +23,11 @@ public:
 
     const T & unwrap() const;
 
+    const T & unwrap_or(const T &other) const;
+
+    template <typename F>
+    T unwrap_or_else(F && f) const;
+
     const T & expect(std::string_view msg) const;
 
     const option<T> &and_(const option<T> &other) const;
@@ -55,6 +60,11 @@ public:
     template <typename F1, typename F2>
     auto map_or_else(F1 && f, const F2 &def) const -> decltype(f(unwrap()));
 
+    option<T> replace(T value);
+
+    option<T> take();
+
+    const option<T> &xor_(const option<T> &other) const;
 
 private:
     std::optional<T> d_value;
@@ -97,6 +107,17 @@ bool option<T>::is_some() const {
 template<typename T>
 const T &option<T>::unwrap() const {
     return expect("unwrapping none");
+}
+
+template<typename T>
+const T &option<T>::unwrap_or(const T &other) const {
+    return is_some() ? *d_value : other;
+}
+
+template<typename T>
+template<typename F>
+T option<T>::unwrap_or_else(F && f) const {
+    return is_some() ? *d_value : f();
 }
 
 template<typename T>
@@ -200,6 +221,30 @@ template <typename F1, typename F2>
 auto option<T>::map_or_else(F1 && f, const F2 &def) const -> decltype(f(unwrap())) {
     return is_some() ? f(*d_value) : def();
 
+}
+
+template <typename T>
+option<T> option<T>::replace(T value) {
+    option<T> other(std::move(value));
+    d_value.swap(other.d_value);
+    return other;
+}
+
+template <typename T>
+option<T> option<T>::take() {
+    option<T> other;
+    d_value.swap(other.d_value);
+    return other;
+}
+
+template<typename T>
+const option<T> &option<T>::xor_(const option<T> &other) const {
+    if (is_none() && !other.is_none()) {
+        return other;
+    } else if (is_some() && !other.is_some()) {
+        return *this;
+    }
+    return make_none<T>();
 }
 
 

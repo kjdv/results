@@ -27,6 +27,18 @@ TEST(option, unwrap) {
     EXPECT_EQ(2, make_some<int>(2).unwrap());
 }
 
+TEST(option, unwrap_or) {
+    EXPECT_EQ(2, make_some<int>(2).unwrap_or(3));
+    EXPECT_EQ(3, make_none<int>().unwrap_or(3));
+}
+
+TEST(option, unwrap_or_else) {
+    auto f = []{ return 3; };
+    EXPECT_EQ(2, make_some<int>(2).unwrap_or_else(f));
+    EXPECT_EQ(3, make_none<int>().unwrap_or_else(f));
+}
+
+
 TEST(option, expect) {
     EXPECT_THROW(make_none<int>().expect("booh"), std::runtime_error);
     EXPECT_EQ(2, make_some<int>(2).expect("booh"));
@@ -111,6 +123,32 @@ TEST(option, map_or_else) {
     EXPECT_EQ(6, make_some<int>(3).map_or_else(f, g));
 }
 
+TEST(option, replace) {
+    auto some = make_some<int>(2);
+    auto other = some.replace(5);
+
+    EXPECT_EQ(2, other.unwrap());
+    EXPECT_EQ(5, some.unwrap());
+}
+
+TEST(option, take) {
+    auto some = make_some<int>(2);
+    auto other = some.take();
+
+    EXPECT_EQ(2, other.unwrap());
+    EXPECT_TRUE(some.is_none());
+}
+
+TEST(option, xor_) {
+    auto a = make_some<int>(1);
+    auto b = make_some<int>(2);
+    auto n = make_none<int>();
+
+    EXPECT_TRUE(a.xor_(b).is_none());
+    EXPECT_TRUE(n.xor_(n).is_none());
+    EXPECT_EQ(1, a.xor_(n).unwrap());
+    EXPECT_EQ(1, n.xor_(a).unwrap());
+}
 
 }
 }
