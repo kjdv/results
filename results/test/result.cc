@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <results/result.hh>
+#include "result.hh"
 #include <stdexcept>
 #include <string>
 #include <type_traits>
