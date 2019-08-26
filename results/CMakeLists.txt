@@ -18,9 +18,15 @@ if(APPLE)
     target_link_libraries(results PUBLIC -mmacosx-version-min=10.14)
 endif()
 
+# tests
 add_executable(results_test
     test/option.cc
     test/result.cc
     test/utils.cc
 )
 target_link_libraries(results_test results gtest)
+add_test(results_test results_test)
+
+# install rules
+install(TARGETS results)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/results DESTINATION include)
