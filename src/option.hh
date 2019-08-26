@@ -66,6 +66,8 @@ public:
 
     constexpr option<T> xor_(const option<T> &other) const noexcept;
 
+    constexpr value_type flatten() const noexcept;
+
 private:
     template <typename... Args>
     constexpr option(Args&&... args) noexcept;
@@ -81,11 +83,6 @@ constexpr option<std::decay_t<T>> make_none() noexcept {
 template <typename T, typename... Args>
 constexpr option<std::decay_t<T>> make_some(Args&&... args) noexcept {
     return option<std::decay_t<T>>::some(std::forward<Args>(args)...);
-}
-
-template <typename T>
-constexpr option<T> flatten(const option<option<T>> &o) noexcept {
-    return o.is_some() ? o.unwrap() : make_none<T>();
 }
 
 template<typename T>
@@ -259,6 +256,13 @@ constexpr option<T> option<T>::xor_(const option<T> &other) const noexcept {
     }
     return make_none<T>();
 }
+
+template<typename T>
+constexpr typename option<T>::value_type option<T>::flatten() const noexcept {
+    static_assert(std::is_same_v<option<typename T::value_type>, T>, "contained type must be an option itself");
+    return is_some() ? unwrap() : make_none<typename T::value_type>();
+}
+
 
 
 }

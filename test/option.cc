@@ -85,8 +85,8 @@ TEST(option, flatten) {
     auto some = make_some<option<int>>(make_some<int>(3));
     auto none = make_none<option<int>>();
 
-    EXPECT_EQ(3, flatten(some).unwrap());
-    EXPECT_TRUE(flatten(none).is_none());
+    EXPECT_EQ(3, some.flatten().unwrap());
+    EXPECT_TRUE(none.flatten().is_none());
 }
 
 TEST(option, get_or_insert) {
