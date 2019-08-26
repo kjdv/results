@@ -1,13 +1,19 @@
 #pragma once
 
 #include <string_view>
+#include <string>
 #include <stdexcept>
 
 namespace results {
 
-class panicked : public std::runtime_error {
+class panicked : public std::exception {
 public:
-    using std::runtime_error::runtime_error;
+    explicit panicked(std::string_view msg);
+
+    const char *what() const noexcept;
+
+private:
+    std::string d_msg;
 };
 
 namespace internal {

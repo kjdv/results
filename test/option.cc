@@ -23,7 +23,7 @@ TEST(option, is_some) {
 }
 
 TEST(option, unwrap) {
-    EXPECT_THROW(make_none<int>().unwrap(), std::runtime_error);
+    EXPECT_THROW(make_none<int>().unwrap(), panicked);
     EXPECT_EQ(2, make_some<int>(2).unwrap());
 }
 
@@ -40,7 +40,7 @@ TEST(option, unwrap_or_else) {
 
 
 TEST(option, expect) {
-    EXPECT_THROW(make_none<int>().expect("booh"), std::runtime_error);
+    EXPECT_THROW(make_none<int>().expect("booh"), panicked);
     EXPECT_EQ(2, make_some<int>(2).expect("booh"));
 }
 
