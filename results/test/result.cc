@@ -1,4 +1,4 @@
-#include <result.hh>
+#include <results/result.hh>
 #include <gtest/gtest.h>
 #include <string>
 #include <type_traits>

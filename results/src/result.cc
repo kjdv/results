@@ -1,4 +1,4 @@
-#include "result.hh"
+#include <results/result.hh>
 
 namespace results {
 

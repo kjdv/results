@@ -14,5 +14,4 @@ target_link_libraries(gtest
     INTERFACE ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} ${GTEST_MAIN_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 enable_testing() 
-add_subdirectory(src) 
-add_subdirectory(test)
+add_subdirectory(results)
