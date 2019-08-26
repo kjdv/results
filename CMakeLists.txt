@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.15)
 
 project(results)
 set(CMAKE_CXX_STANDARD 17)
@@ -13,5 +13,6 @@ target_include_directories(gtest
 target_link_libraries(gtest
     INTERFACE ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} ${GTEST_MAIN_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-enable_testing() 
-add_subdirectory(results)
+enable_testing()
+add_subdirectory(src)
+add_subdirectory(test)
