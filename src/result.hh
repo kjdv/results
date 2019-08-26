@@ -19,31 +19,31 @@ public:
     using error_type = E;
 
     template<typename... Args>
-    static result<T, E> ok(Args&&... args) noexcept;
+    constexpr static result<T, E> ok(Args&&... args) noexcept;
 
     template<typename... Args>
-    static result<T, E> err(Args&&... args) noexcept;
+    constexpr static result<T, E> err(Args&&... args) noexcept;
 
-    bool is_ok() const noexcept;
+    constexpr bool is_ok() const noexcept;
 
-    bool is_err() const noexcept;
+    constexpr bool is_err() const noexcept;
 
-    const T &expect(std::string_view msg) const;
+    constexpr const T &expect(std::string_view msg) const;
 
-    const E &expect_err(std::string_view msg) const;
+    constexpr const E &expect_err(std::string_view msg) const;
 
-    const T &unwrap() const;
+    constexpr const T &unwrap() const;
 
-    const E &unwrap_err() const;
+    constexpr const E &unwrap_err() const;
 
-    const T &unwrap_or(const T &other) noexcept;
+    constexpr const T &unwrap_or(const T &other) noexcept;
 
     template <typename F>
     T unwrap_or_else(F && f) const;
 
-    const result<T, E> &and_(const result<T, E> &other) const noexcept;
+    constexpr const result<T, E> &and_(const result<T, E> &other) const noexcept;
 
-    const result<T, E> &or_(const result<T, E> &other) const noexcept;
+    constexpr const result<T, E> &or_(const result<T, E> &other) const noexcept;
 
     template <typename F>
     result<T, E> or_else(F && f) const;
@@ -65,11 +65,11 @@ public:
 
 private:
     template<typename... Args>
-    result(Args&&... args);
+    constexpr result(Args&&... args);
 
-    const T & get_ok() const;
+    constexpr const T & get_ok() const noexcept;
 
-    const E & get_err() const;
+    constexpr const E & get_err() const noexcept;
 
     enum {
         OK = 0,
@@ -81,45 +81,45 @@ private:
 
 
 template <typename T, typename E = error, typename... Args>
-result<T, E> make_ok(Args&&... args) noexcept {
+constexpr result<T, E> make_ok(Args&&... args) noexcept {
     return result<T, E>::ok(std::forward<Args>(args)...);
 }
 
 template <typename T, typename E = error, typename... Args>
-result<T, E> make_err(Args&&... args) noexcept {
+constexpr result<T, E> make_err(Args&&... args) noexcept {
     return result<T, E>::err(std::forward<Args>(args)...);
 }
 
 template<typename T, typename E>
 template<typename... Args>
-result<T, E> result<T, E>::ok(Args&&... args) noexcept {
+constexpr result<T, E> result<T, E>::ok(Args&&... args) noexcept {
     return result<T, E>(std::in_place_index<OK>, std::forward<Args>(args)...);
 }
 
 template<typename T, typename E>
 template<typename... Args>
-result<T, E> result<T, E>::err(Args&&... args) noexcept {
+constexpr result<T, E> result<T, E>::err(Args&&... args) noexcept {
     return result<T, E>(std::in_place_index<ERR>, std::forward<Args>(args)...);
 }
 
 template<typename T, typename E>
 template<typename... Args>
-result<T, E>::result(Args&&... args)
+constexpr result<T, E>::result(Args&&... args)
     : d_value(std::forward<Args>(args)...)
 {}
 
 template<typename T, typename E>
-bool result<T, E>::is_ok() const noexcept {
+constexpr bool result<T, E>::is_ok() const noexcept {
     return d_value.index() == OK;
 }
 
 template<typename T, typename E>
-bool result<T, E>::is_err() const noexcept {
+constexpr bool result<T, E>::is_err() const noexcept {
     return d_value.index() == ERR;
 }
 
 template<typename T, typename E>
-const T &result<T, E>::expect(std::string_view msg) const {
+constexpr const T &result<T, E>::expect(std::string_view msg) const {
     if (!is_ok()) {
         internal::panic(msg);
     }
@@ -127,27 +127,27 @@ const T &result<T, E>::expect(std::string_view msg) const {
 }
 
 template<typename T, typename E>
-const T &result<T, E>::unwrap() const {
+constexpr const T &result<T, E>::unwrap() const {
     return expect("unwrapping err");
 }
 
 template<typename T, typename E>
-const T &result<T, E>::get_ok() const {
+constexpr const T &result<T, E>::get_ok() const noexcept{
     return std::get<OK>(d_value);
 }
 
 template<typename T, typename E>
-const E &result<T, E>::get_err() const {
+constexpr const E &result<T, E>::get_err() const noexcept{
     return std::get<ERR>(d_value);
 }
 
 template <typename T, typename E>
-const result<T, E> &result<T, E>::and_(const result<T, E> &other) const noexcept {
+constexpr const result<T, E> &result<T, E>::and_(const result<T, E> &other) const noexcept {
     return is_ok() ? other : *this;
 }
 
 template <typename T, typename E>
-const result<T, E> &result<T, E>::or_(const result<T, E> &other) const noexcept {
+constexpr const result<T, E> &result<T, E>::or_(const result<T, E> &other) const noexcept {
     return is_err() ? other : *this;
 }
 
@@ -158,7 +158,7 @@ result<T, E> result<T, E>::or_else(F && f) const {
 }
 
 template <typename T, typename E>
-const E &result<T, E>::expect_err(std::string_view msg) const {
+constexpr const E &result<T, E>::expect_err(std::string_view msg) const {
     if (!is_err()) {
         internal::panic(msg);
     }
@@ -166,12 +166,12 @@ const E &result<T, E>::expect_err(std::string_view msg) const {
 }
 
 template <typename T, typename E>
-const E &result<T, E>::unwrap_err() const {
+constexpr const E &result<T, E>::unwrap_err() const {
     return expect_err("unwrapping ok");
 }
 
 template <typename T, typename E>
-const T &result<T, E>::unwrap_or(const T &other) noexcept {
+constexpr const T &result<T, E>::unwrap_or(const T &other) noexcept {
     return is_ok() ? get_ok() : other;
 }
 
