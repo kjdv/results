@@ -2,7 +2,7 @@
 
 namespace results {
 
-error::error(std::string_view m)
+error::error(std::string_view m) noexcept
     : msg(m)
 {}
 

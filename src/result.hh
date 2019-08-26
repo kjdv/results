@@ -9,7 +9,7 @@ namespace results {
 
 struct error {
     std::string msg;
-    error(std::string_view m = "");
+    error(std::string_view m = "") noexcept;
 };
 
 template <typename T, typename E = error>
@@ -19,14 +19,14 @@ public:
     using error_type = E;
 
     template<typename... Args>
-    static result<T, E> ok(Args&&... args);
+    static result<T, E> ok(Args&&... args) noexcept;
 
     template<typename... Args>
-    static result<T, E> err(Args&&... args);
+    static result<T, E> err(Args&&... args) noexcept;
 
-    bool is_ok() const;
+    bool is_ok() const noexcept;
 
-    bool is_err() const;
+    bool is_err() const noexcept;
 
     const T &expect(std::string_view msg) const;
 
@@ -36,14 +36,14 @@ public:
 
     const E &unwrap_err() const;
 
-    const T &unwrap_or(const T &other);
+    const T &unwrap_or(const T &other) noexcept;
 
     template <typename F>
     T unwrap_or_else(F && f) const;
 
-    const result<T, E> &and_(const result<T, E> &other) const;
+    const result<T, E> &and_(const result<T, E> &other) const noexcept;
 
-    const result<T, E> &or_(const result<T, E> &other) const;
+    const result<T, E> &or_(const result<T, E> &other) const noexcept;
 
     template <typename F>
     result<T, E> or_else(F && f) const;
@@ -81,24 +81,24 @@ private:
 
 
 template <typename T, typename E = error, typename... Args>
-result<T, E> make_ok(Args&&... args) {
+result<T, E> make_ok(Args&&... args) noexcept {
     return result<T, E>::ok(std::forward<Args>(args)...);
 }
 
 template <typename T, typename E = error, typename... Args>
-result<T, E> make_err(Args&&... args) {
+result<T, E> make_err(Args&&... args) noexcept {
     return result<T, E>::err(std::forward<Args>(args)...);
 }
 
 template<typename T, typename E>
 template<typename... Args>
-result<T, E> result<T, E>::ok(Args&&... args) {
+result<T, E> result<T, E>::ok(Args&&... args) noexcept {
     return result<T, E>(std::in_place_index<OK>, std::forward<Args>(args)...);
 }
 
 template<typename T, typename E>
 template<typename... Args>
-result<T, E> result<T, E>::err(Args&&... args) {
+result<T, E> result<T, E>::err(Args&&... args) noexcept {
     return result<T, E>(std::in_place_index<ERR>, std::forward<Args>(args)...);
 }
 
@@ -109,12 +109,12 @@ result<T, E>::result(Args&&... args)
 {}
 
 template<typename T, typename E>
-bool result<T, E>::is_ok() const {
+bool result<T, E>::is_ok() const noexcept {
     return d_value.index() == OK;
 }
 
 template<typename T, typename E>
-bool result<T, E>::is_err() const {
+bool result<T, E>::is_err() const noexcept {
     return d_value.index() == ERR;
 }
 
@@ -142,12 +142,12 @@ const E &result<T, E>::get_err() const {
 }
 
 template <typename T, typename E>
-const result<T, E> &result<T, E>::and_(const result<T, E> &other) const {
+const result<T, E> &result<T, E>::and_(const result<T, E> &other) const noexcept {
     return is_ok() ? other : *this;
 }
 
 template <typename T, typename E>
-const result<T, E> &result<T, E>::or_(const result<T, E> &other) const {
+const result<T, E> &result<T, E>::or_(const result<T, E> &other) const noexcept {
     return is_err() ? other : *this;
 }
 
@@ -171,7 +171,7 @@ const E &result<T, E>::unwrap_err() const {
 }
 
 template <typename T, typename E>
-const T &result<T, E>::unwrap_or(const T &other) {
+const T &result<T, E>::unwrap_or(const T &other) noexcept {
     return is_ok() ? get_ok() : other;
 }
 

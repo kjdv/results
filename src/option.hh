@@ -13,24 +13,24 @@ public:
     using value_type = T;
 
     template <typename... Args>
-    static option<T> some(Args&&... args);
+    static option<T> some(Args&&... args) noexcept;
 
-    static option<T> none();
+    static option<T> none() noexcept;
 
-    bool is_none() const;
+    bool is_none() const noexcept;
 
-    bool is_some() const;
+    bool is_some() const noexcept;
 
     const T & unwrap() const;
 
-    const T & unwrap_or(const T &other) const;
+    const T & unwrap_or(const T &other) const noexcept;
 
     template <typename F>
     T unwrap_or_else(F && f) const;
 
     const T & expect(std::string_view msg) const;
 
-    const option<T> &and_(const option<T> &other) const;
+    const option<T> &and_(const option<T> &other) const noexcept;
 
     template <typename F>
     auto and_then(F && f) const -> decltype(f(unwrap()));
@@ -39,14 +39,14 @@ public:
     auto match(F1 && on_some, F2 && on_none) const -> decltype(on_some(unwrap()));
 
     template <typename P>
-    option<T> filter(P && predicate) const;
+    option<T> filter(P && predicate) const noexcept;
 
-    const option<T> &or_(const option<T> &other) const;
+    const option<T> &or_(const option<T> &other) const noexcept;
 
     template <typename F>
     option<T> or_else(F && f) const;
 
-    T &get_or_insert(T value);
+    T &get_or_insert(T value) noexcept;
 
     template <typename F>
     T &get_or_insert_with(F && f);
@@ -60,58 +60,58 @@ public:
     template <typename F1, typename F2>
     auto map_or_else(F1 && f, const F2 &def) const -> decltype(f(unwrap()));
 
-    option<T> replace(T value);
+    option<T> replace(T value) noexcept;
 
-    option<T> take();
+    option<T> take() noexcept;
 
-    option<T> xor_(const option<T> &other) const;
+    option<T> xor_(const option<T> &other) const noexcept;
 
 private:
     template <typename... Args>
-    option(Args&&... args);
+    option(Args&&... args) noexcept;
 
     std::optional<T> d_value;
 };
 
 template <typename T>
-option<std::decay_t<T>> make_none() {
+option<std::decay_t<T>> make_none() noexcept {
     return option<std::decay_t<T>>::none();
 }
 
 template <typename T, typename... Args>
-option<std::decay_t<T>> make_some(Args&&... args) {
+option<std::decay_t<T>> make_some(Args&&... args) noexcept {
     return option<std::decay_t<T>>::some(std::forward<Args>(args)...);
 }
 
 template <typename T>
-option<T> flatten(const option<option<T>> &o) {
+option<T> flatten(const option<option<T>> &o) noexcept {
     return o.is_some() ? o.unwrap() : make_none<T>();
 }
 
 template<typename T>
 template <typename... Args>
-option<T> option<T>::some(Args&&... args) {
+option<T> option<T>::some(Args&&... args) noexcept {
     return option<T>(std::in_place, std::forward<Args>(args)...);
 }
 
 template<typename T>
-option<T> option<T>::none() {
+option<T> option<T>::none() noexcept {
     return option<T>(std::nullopt);
 }
 
 template<typename T>
 template <typename... Args>
-option<T>::option(Args&&... args)
+option<T>::option(Args&&... args) noexcept
     : d_value(std::forward<Args>(args)...)
 {}
 
 template<typename T>
-bool option<T>::is_none() const {
+bool option<T>::is_none() const noexcept {
     return !d_value.has_value();
 }
 
 template<typename T>
-bool option<T>::is_some() const {
+bool option<T>::is_some() const noexcept {
     return d_value.has_value();
 }
 
@@ -121,7 +121,7 @@ const T &option<T>::unwrap() const {
 }
 
 template<typename T>
-const T &option<T>::unwrap_or(const T &other) const {
+const T &option<T>::unwrap_or(const T &other) const noexcept {
     return is_some() ? *d_value : other;
 }
 
@@ -140,17 +140,17 @@ const T &option<T>::expect(std::string_view msg) const {
 }
 
 template<typename T>
-const option<T> &option<T>::and_(const option<T> &other) const {
+const option<T> &option<T>::and_(const option<T> &other) const noexcept{
     return is_none() ? *this : other;
 }
 
 template<typename T>
-const option<T> &option<T>::or_(const option<T> &other) const {
+const option<T> &option<T>::or_(const option<T> &other) const noexcept {
     return is_some() ? *this : other;
 }
 
 template<typename T>
-T &option<T>::get_or_insert(T value) {
+T &option<T>::get_or_insert(T value) noexcept {
     if (is_none()) {
         d_value = std::move(value);
     }
@@ -200,7 +200,7 @@ auto option<T>::match(F1 && on_some, F2 && on_none) const -> decltype(on_some(un
 
 template <typename T>
 template <typename P>
-option<T> option<T>::filter(P && predicate) const {
+option<T> option<T>::filter(P && predicate) const noexcept {
     if (is_none() || !predicate(*d_value)) {
         return make_none<T>();
     }
@@ -237,21 +237,21 @@ auto option<T>::map_or_else(F1 && f, const F2 &def) const -> decltype(f(unwrap()
 }
 
 template <typename T>
-option<T> option<T>::replace(T value) {
+option<T> option<T>::replace(T value) noexcept {
     option<T> other(std::move(value));
     d_value.swap(other.d_value);
     return other;
 }
 
 template <typename T>
-option<T> option<T>::take() {
+option<T> option<T>::take() noexcept {
     option<T> other;
     d_value.swap(other.d_value);
     return other;
 }
 
 template<typename T>
-option<T> option<T>::xor_(const option<T> &other) const {
+option<T> option<T>::xor_(const option<T> &other) const noexcept {
     if (is_none() && !other.is_none()) {
         return other;
     } else if (is_some() && !other.is_some()) {
