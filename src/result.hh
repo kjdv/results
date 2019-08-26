@@ -3,6 +3,7 @@
 #include <variant>
 #include <string>
 #include <string_view>
+#include "utils.hh"
 
 namespace results {
 

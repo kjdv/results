@@ -3,11 +3,9 @@
 #include <optional>
 #include <string_view>
 #include <type_traits>
+#include "utils.hh"
 
 namespace results {
-
-// todo: move to dedicated file/namespace
-[[noreturn]] void panic(std::string_view msg);
 
 template <typename T>
 class option {
@@ -123,7 +121,7 @@ T option<T>::unwrap_or_else(F && f) const {
 template<typename T>
 const T &option<T>::expect(std::string_view msg) const {
     if (!is_some()) {
-        panic(msg);
+        internal::panic(msg);
     }
     return *d_value;
 }
