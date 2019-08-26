@@ -92,7 +92,53 @@ TEST(result, or_else) {
     EXPECT_EQ(2, err.or_else(f).unwrap());
 }
 
+TEST(result, and_then) {
+    auto f = [](int i) { return make_ok<std::string>(std::to_string(i)); };
+    auto ok = make_ok<int>(42);
+    auto err = make_err<int>();
 
+    EXPECT_EQ("42", ok.and_then(f).unwrap());
+    EXPECT_TRUE(err.and_then(f).is_err());
+}
+
+TEST(result, match) {
+    auto on_ok = [](int i) { return i * 2; };
+    auto on_err = [](const error &) { return 42; };
+
+    auto ok = make_ok<int>(2);
+    auto err = make_err<int>();
+
+    EXPECT_EQ(4, ok.match(on_ok, on_err));
+    EXPECT_EQ(42, err.match(on_ok, on_err));
+}
+
+TEST(result, map) {
+    auto f = [](int i) { return std::to_string(i); };
+    auto ok = make_ok<int>(42);
+    auto err = make_err<int>();
+
+    EXPECT_EQ("42", ok.map(f).unwrap());
+    EXPECT_TRUE(err.map(f).is_err());
+}
+
+TEST(result, map_err) {
+    auto f = [](const error &e) { return e.msg; };
+    auto ok = make_ok<int>(1);
+    auto err = make_err<int>("booh!");
+
+    EXPECT_EQ(1, ok.map_err(f).unwrap());
+    EXPECT_EQ("booh!", err.map_err(f).unwrap_err());
+}
+
+TEST(result, map_or_else) {
+    auto f = [](int i) { return i * 2; };
+    auto g = [](const error &) { return 42; };
+    auto ok = make_ok<int>(2);
+    auto err = make_err<int>();
+
+    EXPECT_EQ(4, ok.map_or_else(f, g));
+    EXPECT_EQ(42, err.map_or_else(f, g));
+}
 
 }
 }

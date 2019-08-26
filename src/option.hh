@@ -176,7 +176,7 @@ auto option<T>::and_then(F && f) const -> decltype(f(unwrap())) {
 template <typename T>
 template <typename F1, typename F2>
 auto option<T>::match(F1 && on_some, F2 && on_none) const -> decltype(on_some(unwrap())) {
-    static_assert(std::is_constructible<decltype(on_none()), decltype(on_some(unwrap()))>::value,
+    static_assert(std::is_convertible<decltype(on_none()), decltype(on_some(unwrap()))>::value,
                   "return value of on_none() must be equal or convertible to the return value of on_some()");
 
     if (is_some()) {
