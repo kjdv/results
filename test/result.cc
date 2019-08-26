@@ -140,5 +140,20 @@ TEST(result, map_or_else) {
     EXPECT_EQ(42, err.map_or_else(f, g));
 }
 
+TEST(result, same_ok_and_err_type) {
+    // edge case: what if someone has the same ok and err types
+    auto ok = make_ok<std::string, std::string>("ok");
+    auto err = make_err<std::string, std::string>("not ok");
+
+    EXPECT_TRUE(ok.is_ok());
+    EXPECT_FALSE(err.is_ok());
+
+    auto on_ok = [](auto&&) { return 1; };
+    auto on_err =  [](auto&&) { return 2; };
+
+    EXPECT_EQ(1, ok.match(on_ok, on_err));
+    EXPECT_EQ(2, err.match(on_ok, on_err));
+}
+
 }
 }

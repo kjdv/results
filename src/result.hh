@@ -9,13 +9,7 @@ namespace results {
 
 struct error {
     std::string msg;
-
-    error()
-    {}
-
-    error(std::string_view m)
-        : msg(m)
-    {}
+    error(std::string_view m = "");
 };
 
 template <typename T, typename E = error>
@@ -24,8 +18,11 @@ public:
     using value_type = T;
     using error_type = E;
 
-    explicit result(T ok);
-    explicit result(E err);
+    template<typename... Args>
+    static result<T, E> ok(Args&&... args);
+
+    template<typename... Args>
+    static result<T, E> err(Args&&... args);
 
     bool is_ok() const;
 
@@ -67,6 +64,9 @@ public:
     auto map_or_else(F1 && f, const F2 &def) const -> decltype(f(unwrap()));
 
 private:
+    template<typename... Args>
+    result(Args&&... args);
+
     const T & get_ok() const;
 
     const E & get_err() const;
@@ -82,23 +82,30 @@ private:
 
 template <typename T, typename E = error, typename... Args>
 result<T, E> make_ok(Args&&... args) {
-    return result<T, E>(T(std::forward<Args>(args)...));
+    return result<T, E>::ok(std::forward<Args>(args)...);
 }
 
 template <typename T, typename E = error, typename... Args>
 result<T, E> make_err(Args&&... args) {
-    return result<T, E>(E(std::forward<Args>(args)...));
+    return result<T, E>::err(std::forward<Args>(args)...);
 }
 
+template<typename T, typename E>
+template<typename... Args>
+result<T, E> result<T, E>::ok(Args&&... args) {
+    return result<T, E>(std::in_place_index<OK>, std::forward<Args>(args)...);
+}
 
 template<typename T, typename E>
-result<T, E>::result(T ok)
-    : d_value(std::move(ok))
-{}
+template<typename... Args>
+result<T, E> result<T, E>::err(Args&&... args) {
+    return result<T, E>(std::in_place_index<ERR>, std::forward<Args>(args)...);
+}
 
 template<typename T, typename E>
-result<T, E>::result(E err)
-    : d_value(std::move(err))
+template<typename... Args>
+result<T, E>::result(Args&&... args)
+    : d_value(std::forward<Args>(args)...)
 {}
 
 template<typename T, typename E>
