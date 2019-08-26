@@ -26,7 +26,27 @@ public:
 
     const T &expect(std::string_view msg) const;
 
+    const E &expect_err(std::string_view msg) const {
+        if (!is_err()) {
+            internal::panic(msg);
+        }
+        return get_err();
+    }
+
     const T &unwrap() const;
+
+    const E &unwrap_err() const {
+        return expect_err("unwrapping ok");
+    }
+
+    const T &unwrap_or(const T &other) {
+        return is_ok() ? get_ok() : other;
+    }
+
+    template <typename F>
+    T unwrap_or_else(F && f) const {
+        return is_ok() ? get_ok() : f();
+    }
 
     const result<T, E> &and_(const result<T, E> &other) const;
 

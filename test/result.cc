@@ -30,9 +30,36 @@ TEST(result, expect) {
     EXPECT_EQ(1, make_ok<int>(1).expect("blah"));
 }
 
+TEST(result, expect_err) {
+    EXPECT_THROW(make_ok<int>(1).expect_err("something"), panicked);
+    EXPECT_EQ("something", make_err<int>("something").expect_err("blah").msg);
+}
+
 TEST(result, unwrap) {
     EXPECT_THROW(make_err<int>("booh").unwrap(), panicked);
     EXPECT_EQ(1, make_ok<int>(1).unwrap());
+}
+
+TEST(result, unwrap_err) {
+    EXPECT_THROW(make_ok<int>(1).unwrap_err(), panicked);
+    EXPECT_EQ("something", make_err<int>("something").unwrap_err().msg);
+}
+
+TEST(result, unwrap_or) {
+    auto ok = make_ok<int>(1);
+    auto err = make_err<int>("e");
+
+    EXPECT_EQ(1, ok.unwrap_or(2));
+    EXPECT_EQ(2, err.unwrap_or(2));
+}
+
+TEST(result, unwrap_or_else) {
+    auto ok = make_ok<int>(1);
+    auto err = make_err<int>("e");
+    auto f = []{ return 2; };
+
+    EXPECT_EQ(1, ok.unwrap_or_else(f));
+    EXPECT_EQ(2, err.unwrap_or_else(f));
 }
 
 TEST(result, and_) {
