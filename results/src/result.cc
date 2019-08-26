@@ -3,7 +3,8 @@
 namespace results {
 
 error::error(std::string_view m) noexcept
-    : msg(m)
-{}
-
+  : msg(m)
+{
 }
+
+} // namespace results

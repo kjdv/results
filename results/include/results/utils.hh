@@ -1,19 +1,20 @@
 #pragma once
 
-#include <string_view>
-#include <string>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 
 namespace results {
 
-class panicked : public std::exception {
+class panicked : public std::exception
+{
 public:
-    explicit panicked(std::string_view msg);
+  explicit panicked(std::string_view msg);
 
-    const char *what() const noexcept;
+  const char* what() const noexcept;
 
 private:
-    std::string d_msg;
+  std::string d_msg;
 };
 
 namespace internal {
@@ -22,4 +23,4 @@ namespace internal {
 
 }
 
-}
+} // namespace results
