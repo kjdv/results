@@ -18,16 +18,19 @@ public:
     using value_type = T;
     using error_type = E;
 
+    // contstruct
     template<typename... Args>
     constexpr static result<T, E> ok(Args&&... args) noexcept;
 
     template<typename... Args>
     constexpr static result<T, E> err(Args&&... args) noexcept;
 
+    // info
     constexpr bool is_ok() const noexcept;
 
     constexpr bool is_err() const noexcept;
 
+    // raw access
     constexpr const T &expect(std::string_view msg) const;
 
     constexpr const E &expect_err(std::string_view msg) const;
@@ -41,6 +44,7 @@ public:
     template <typename F>
     T unwrap_or_else(F && f) const;
 
+    // boolean logic
     constexpr const result<T, E> &and_(const result<T, E> &other) const noexcept;
 
     constexpr const result<T, E> &or_(const result<T, E> &other) const noexcept;
@@ -48,11 +52,13 @@ public:
     template <typename F>
     result<T, E> or_else(F && f) const;
 
-    template <typename F>
-    auto and_then(F && f) const -> decltype(f(unwrap()));
-
+    // match
     template <typename F1, typename F2>
     auto match(F1 && on_ok, F2 && on_err) const -> decltype(on_ok(unwrap()));
+
+    // chaining
+    template <typename F>
+    auto and_then(F && f) const -> decltype(f(unwrap()));
 
     template <typename F>
     auto map(F && f) const -> result<std::decay_t<decltype(f(unwrap()))>, error_type>;

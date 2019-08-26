@@ -12,14 +12,19 @@ class option {
 public:
     using value_type = T;
 
+    // construction:
     template <typename... Args>
     static constexpr option<T> some(Args&&... args) noexcept;
 
     static constexpr option<T> none() noexcept;
 
+    // info
     bool constexpr is_none() const noexcept;
 
     bool constexpr is_some() const noexcept;
+
+    // raw access
+    constexpr const T & expect(std::string_view msg) const;
 
     constexpr const T & unwrap() const;
 
@@ -28,28 +33,36 @@ public:
     template <typename F>
     T unwrap_or_else(F && f) const;
 
-    constexpr const T & expect(std::string_view msg) const;
-
+    // boolean logic:
     constexpr const option<T> &and_(const option<T> &other) const noexcept;
-
-    template <typename F>
-    auto and_then(F && f) const -> decltype(f(unwrap()));
-
-    template <typename F1, typename F2>
-    auto match(F1 && on_some, F2 && on_none) const -> decltype(on_some(unwrap()));
-
-    template <typename P>
-    option<T> filter(P && predicate) const;
 
     constexpr const option<T> &or_(const option<T> &other) const noexcept;
 
     template <typename F>
     option<T> or_else(F && f) const;
 
+    constexpr option<T> xor_(const option<T> &other) const noexcept;
+
+    // get
     constexpr T &get_or_insert(T value) noexcept;
 
     template <typename F>
     T &get_or_insert_with(F && f);
+
+    constexpr option<T> replace(T value) noexcept;
+
+    constexpr option<T> take() noexcept;
+
+    // match
+    template <typename F1, typename F2>
+    auto match(F1 && on_some, F2 && on_none) const -> decltype(on_some(unwrap()));
+
+    // chaining
+    template <typename F>
+    auto and_then(F && f) const -> decltype(f(unwrap()));
+
+    template <typename P>
+    option<T> filter(P && predicate) const;
 
     template <typename F>
     auto map(F && f) const -> option<std::decay_t<decltype(f(unwrap()))>>;
@@ -60,12 +73,7 @@ public:
     template <typename F1, typename F2>
     auto map_or_else(F1 && f, const F2 &def) const -> decltype(f(unwrap()));
 
-    constexpr option<T> replace(T value) noexcept;
-
-    constexpr option<T> take() noexcept;
-
-    constexpr option<T> xor_(const option<T> &other) const noexcept;
-
+    // misc
     constexpr value_type flatten() const noexcept;
 
 private:
