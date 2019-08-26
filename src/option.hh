@@ -12,8 +12,10 @@ class option {
 public:
     using value_type = T;
 
-    option();
-    option(T value);
+    template <typename... Args>
+    static option<T> some(Args&&... args);
+
+    static option<T> none();
 
     bool is_none() const;
 
@@ -62,20 +64,23 @@ public:
 
     option<T> take();
 
-    const option<T> &xor_(const option<T> &other) const;
+    option<T> xor_(const option<T> &other) const;
 
 private:
+    template <typename... Args>
+    option(Args&&... args);
+
     std::optional<T> d_value;
 };
 
 template <typename T>
 option<std::decay_t<T>> make_none() {
-    return option<std::decay_t<T>>();
+    return option<std::decay_t<T>>::none();
 }
 
 template <typename T, typename... Args>
 option<std::decay_t<T>> make_some(Args&&... args) {
-    return option<std::decay_t<T>>(T(std::forward<Args>(args)...));
+    return option<std::decay_t<T>>::some(std::forward<Args>(args)...);
 }
 
 template <typename T>
@@ -84,12 +89,20 @@ option<T> flatten(const option<option<T>> &o) {
 }
 
 template<typename T>
-option<T>::option()
-{}
+template <typename... Args>
+option<T> option<T>::some(Args&&... args) {
+    return option<T>(std::in_place, std::forward<Args>(args)...);
+}
 
 template<typename T>
-option<T>::option(T value)
-    : d_value(std::move(value))
+option<T> option<T>::none() {
+    return option<T>(std::nullopt);
+}
+
+template<typename T>
+template <typename... Args>
+option<T>::option(Args&&... args)
+    : d_value(std::forward<Args>(args)...)
 {}
 
 template<typename T>
@@ -167,10 +180,10 @@ template<typename T>
 template<typename F>
 auto option<T>::and_then(F && f) const -> decltype(f(unwrap())) {
     using U = decltype(f(unwrap()));
-    if (is_none()) {
-        return U();
-    }
-    return f(*d_value);
+    return match(
+                [&](auto&& some) { return f(some); },
+                []() { return make_none<typename U::value_type>(); }
+    );
 }
 
 template <typename T>
@@ -198,27 +211,29 @@ template <typename T>
 template <typename F>
 auto option<T>::map(F && f) const -> option<std::decay_t<decltype(f(unwrap()))>> {
     using U = std::decay_t<decltype(f(unwrap()))>;
-    if (is_none()) {
-        return option<U>();
-    }
-    return option<U>(f(*d_value));
+    return match(
+             [&](auto&& some) { return make_some<U>(f(some)); },
+             []() { return make_none<U>(); }
+    );
 }
 
 template <typename T>
 template <typename F, typename U>
 auto option<T>::map_or(F && f, const U &def) const -> decltype(f(unwrap())) {
-   if (is_none()) {
-      return def;
-   }
-   return f(*d_value);
+   return match(
+             [&](auto&& some) { return f(some); },
+             [&]() { return def; }
+   );
 }
 
 
 template <typename T>
 template <typename F1, typename F2>
 auto option<T>::map_or_else(F1 && f, const F2 &def) const -> decltype(f(unwrap())) {
-    return is_some() ? f(*d_value) : def();
-
+    return match(
+              [&](auto&& some) { return f(some); },
+              [&]() { return def(); }
+    );
 }
 
 template <typename T>
@@ -236,7 +251,7 @@ option<T> option<T>::take() {
 }
 
 template<typename T>
-const option<T> &option<T>::xor_(const option<T> &other) const {
+option<T> option<T>::xor_(const option<T> &other) const {
     if (is_none() && !other.is_none()) {
         return other;
     } else if (is_some() && !other.is_some()) {
