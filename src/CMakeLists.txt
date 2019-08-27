@@ -18,4 +18,4 @@ install(TARGETS results
 )
 
 export(TARGETS results NAMESPACE Results:: FILE ${CMAKE_CURRENT_BINARY_DIR}/ResultsConfig.cmake)
-install(EXPORT ResultsConfig DESTINATION share/results/cmake NAMESPACE Results::)
+install(EXPORT ResultsConfig DESTINATION share/results NAMESPACE Results::)
