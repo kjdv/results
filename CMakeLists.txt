@@ -3,15 +3,9 @@ cmake_minimum_required(VERSION 3.13)
 project(results)
 set(CMAKE_CXX_STANDARD 17)
 
-find_package (Threads REQUIRED)
-find_package(GTest REQUIRED)
-find_library(GMOCK_LIBRARIES gmock)
-add_library(gtest INTERFACE)
-target_include_directories(gtest
-    INTERFACE ${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS}
-)
-target_link_libraries(gtest
-    INTERFACE ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} ${GTEST_MAIN_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+enable_testing()
+
+find_package(GTest MODULE REQUIRED)
 
 if(APPLE)
     # for osx we need to set the minimal deployement target to 10.14 to be able to use certain c++17 features (i.e.
