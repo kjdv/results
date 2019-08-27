@@ -13,8 +13,8 @@ target_include_directories(results PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOU
 # install rules
 install(TARGETS results
         EXPORT ResultsConfig
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT lib
-        PUBLIC_HEADER DESTINATION "include/results" COMPONENT dev
+        ARCHIVE DESTINATION lib COMPONENT lib
+        PUBLIC_HEADER DESTINATION include/results COMPONENT dev
 )
 
 export(TARGETS results NAMESPACE Results:: FILE ${CMAKE_CURRENT_BINARY_DIR}/ResultsConfig.cmake)
