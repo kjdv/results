@@ -8,7 +8,7 @@ add_library(results
 
 set_target_properties(results PROPERTIES PUBLIC_HEADER "${public_headers}")
 target_include_directories(results PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>")
 
 # install rules
 install(TARGETS results
