@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 #include <variant>
+#include <stdexcept>
 
 namespace results {
 
@@ -98,6 +99,25 @@ constexpr result<T, E> make_err(Args&&... args) noexcept
 {
   return result<T, E>::err(std::forward<Args>(args)...);
 }
+
+template <typename F, typename E = error>
+auto make_from_throwable(F && f) noexcept -> result<std::decay_t<decltype(f())>, E>
+{
+  using R = result<std::decay_t<decltype(f())>, E>;
+  try
+  {
+    return R::ok(f());
+  }
+  catch(const std::exception &e)
+  {
+    return R::err(e.what());
+  }
+  catch(...)
+  {
+    return R::err("non-std exception");
+  }
+}
+
 
 template <typename T, typename E>
 template <typename... Args>

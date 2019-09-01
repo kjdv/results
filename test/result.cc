@@ -171,5 +171,16 @@ TEST(result, same_ok_and_err_type)
   EXPECT_EQ(2, err.match(on_ok, on_err));
 }
 
+TEST(result, make_from_throwable)
+{
+  auto ok = [] { return 1; };
+  auto throws_std = [] { throw std::runtime_error("booh!"); return 1; };
+  auto throws_nonstd = [] { throw 42; return 1; };
+
+  EXPECT_EQ(1, make_from_throwable(ok).unwrap());
+  EXPECT_EQ("booh!", make_from_throwable(throws_std).unwrap_err().msg);
+  EXPECT_EQ("non-std exception", make_from_throwable(throws_nonstd).unwrap_err().msg);
+}
+
 } // namespace
 } // namespace results
