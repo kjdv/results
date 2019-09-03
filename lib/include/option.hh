@@ -66,7 +66,7 @@ public:
   option<T> filter(P&& predicate) const;
 
   template <typename F>
-  auto map(F&& f) const -> option<std::decay_t<decltype(f(unwrap()))>>;
+  auto map(F&& f) const -> option<return_wrapper_t<decltype(f(unwrap()))>>;
 
   template <typename F, typename U>
   auto map_or(F&& f, const U& def) const -> decltype(f(unwrap()));
@@ -236,11 +236,12 @@ option<T> option<T>::filter(P&& predicate) const
 
 template <typename T>
 template <typename F>
-auto option<T>::map(F&& f) const -> option<std::decay_t<decltype(f(unwrap()))>>
+auto option<T>::map(F&& f) const -> option<return_wrapper_t<decltype(f(unwrap()))>>
 {
-  using U = std::decay_t<decltype(f(unwrap()))>;
+  using R = return_wrapper<decltype(f(unwrap()))>;
+  using U = typename R::type;
   return match(
-      [&](auto&& some) { return make_some<U>(f(some)); },
+      [&](auto&& some) { return make_some<U>(R::call(f, some)); },
       []() { return make_none<U>(); });
 }
 

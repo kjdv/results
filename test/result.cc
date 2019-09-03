@@ -182,5 +182,15 @@ TEST(result, make_from_throwable)
   EXPECT_EQ("non-std exception", make_from_throwable(throws_nonstd).unwrap_err().msg);
 }
 
+TEST(option, map_to_work_with_void_returning)
+{
+  int val = 0;
+  auto f = [&](int i) { val = i; };
+  make_ok<int>(42).map(f);
+
+  EXPECT_EQ(42, val);
+}
+
+
 } // namespace
 } // namespace results

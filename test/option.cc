@@ -168,5 +168,24 @@ TEST(option, xor_)
   EXPECT_EQ(1, n.xor_(a).unwrap());
 }
 
+TEST(option, map_to_work_with_void_returning)
+{
+  int val = 0;
+  auto f = [&](int i) { val = i; };
+  make_some<int>(42).map(f);
+
+  EXPECT_EQ(42, val);
+}
+
+TEST(option, match_with_void_returning)
+{
+  int val = 0;
+  auto on_some = [&](int i) { val = i; };
+  auto on_none = []{};
+
+  make_some<int>(42).match(on_some, on_none);
+  EXPECT_EQ(42, val);
+}
+
 } // namespace
 } // namespace results

@@ -64,7 +64,7 @@ public:
   auto and_then(F&& f) const -> decltype(f(unwrap()));
 
   template <typename F>
-  auto map(F&& f) const -> result<std::decay_t<decltype(f(unwrap()))>, error_type>;
+  auto map(F&& f) const -> result<return_wrapper_t<decltype(f(unwrap()))>, error_type>;
 
   template <typename F>
   auto map_err(F&& f) const -> result<value_type, std::decay_t<decltype(f(unwrap_err()))>>;
@@ -249,11 +249,12 @@ auto result<T, E>::match(F1&& on_ok, F2&& on_err) const -> decltype(on_ok(unwrap
 
 template <typename T, typename E>
 template <typename F>
-auto result<T, E>::map(F&& f) const -> result<std::decay_t<decltype(f(unwrap()))>, error_type>
+auto result<T, E>::map(F&& f) const -> result<return_wrapper_t<decltype(f(unwrap()))>, error_type>
 {
-  using U = decltype(f(unwrap()));
+  using R = return_wrapper<decltype(f(unwrap()))>;
+  using U = typename R::type;
   return match(
-      [&](auto&& ok) { return make_ok<U, E>(f(ok)); },
+      [&](auto&& ok) { return make_ok<U, E>(R::call(f, ok)); },
       [](auto&& err) { return make_err<U, E>(err); });
 }
 
