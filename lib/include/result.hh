@@ -72,6 +72,9 @@ public:
   template <typename F1, typename F2>
   auto map_or_else(F1&& f, const F2& def) const -> decltype(f(unwrap()));
 
+  template <typename F>
+  auto consume(F&& f) -> result<return_wrapper_t<decltype(f(unwrap()))>, error_type>;
+
 private:
   template <typename... Args>
   constexpr result(Args&&... args);
@@ -274,5 +277,18 @@ auto result<T, E>::map_or_else(F1&& f, const F2& def) const -> decltype(f(unwrap
 {
   return match(f, def);
 }
+
+template <typename T, typename E>
+template <typename F>
+auto result<T, E>::consume(F&& f) -> result<return_wrapper_t<decltype(f(unwrap()))>, error_type>
+{
+  using R = return_wrapper<decltype(f(unwrap()))>;
+  using U = typename R::type;
+
+  if (is_ok())
+    return make_ok<U, E>(R::call(f, std::move(std::get<OK>(d_value))));
+  return make_err<U, E>(std::move(std::get<ERR>(d_value)));
+}
+
 
 } // namespace results

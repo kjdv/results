@@ -191,6 +191,17 @@ TEST(option, map_to_work_with_void_returning)
   EXPECT_EQ(42, val);
 }
 
+TEST(option, use_moved_into)
+{
+  using T = std::unique_ptr<int>;
+
+  int val = 0;
+  auto f = [&](auto&& v) { val = *v; return 0; };
+
+  make_ok<T>(std::make_unique<int>(42)).consume(f);
+  EXPECT_EQ(42, val);
+}
+
 
 } // namespace
 } // namespace results

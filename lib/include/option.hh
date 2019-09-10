@@ -77,6 +77,9 @@ public:
   // misc
   constexpr value_type flatten() const noexcept;
 
+  template <typename F>
+  auto consume(F && f) -> option<return_wrapper_t<decltype(f(unwrap()))>>;
+
 private:
   template <typename... Args>
   constexpr option(Args&&... args) noexcept;
@@ -292,6 +295,19 @@ constexpr option<T> option<T>::xor_(const option<T>& other) const noexcept
   }
   return make_none<T>();
 }
+
+template <typename T>
+template <typename F>
+auto option<T>::consume(F&& f) -> option<return_wrapper_t<decltype(f(unwrap()))>>
+{
+  using R = return_wrapper<decltype(f(unwrap()))>;
+  using U = typename R::type;
+
+  if (is_some())
+    return make_some<U>(R::call(f, std::move(*d_value)));
+  return make_none<U>();
+}
+
 
 template <typename T>
 constexpr typename option<T>::value_type option<T>::flatten() const noexcept
