@@ -17,6 +17,13 @@ struct error
 template <typename T, typename E = error>
 class result
 {
+private:
+  // todo: move somewhere else, just to support decltype() calls
+  T value()
+  {
+    return d_value.value();
+  }
+
 public:
   using value_type = T;
   using error_type = E;
@@ -73,7 +80,7 @@ public:
   auto map_or_else(F1&& f, const F2& def) const -> decltype(f(unwrap()));
 
   template <typename F>
-  auto consume(F&& f) -> result<return_wrapper_t<decltype(f(unwrap()))>, error_type>;
+  auto consume(F&& f) -> result<return_wrapper_t<decltype(f(value()))>, error_type>;
 
 private:
   template <typename... Args>
@@ -280,9 +287,9 @@ auto result<T, E>::map_or_else(F1&& f, const F2& def) const -> decltype(f(unwrap
 
 template <typename T, typename E>
 template <typename F>
-auto result<T, E>::consume(F&& f) -> result<return_wrapper_t<decltype(f(unwrap()))>, error_type>
+auto result<T, E>::consume(F&& f) -> result<return_wrapper_t<decltype(f(value()))>, error_type>
 {
-  using R = return_wrapper<decltype(f(unwrap()))>;
+  using R = return_wrapper<decltype(f(value()))>;
   using U = typename R::type;
 
   if (is_ok())

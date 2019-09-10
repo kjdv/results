@@ -10,6 +10,12 @@ namespace results {
 template <typename T>
 class option
 {
+private:
+  // todo: move somewhere else, just to support decltype() calls
+  T value()
+  {
+    return d_value.value();
+  }
 public:
   using value_type = T;
 
@@ -78,7 +84,7 @@ public:
   constexpr value_type flatten() const noexcept;
 
   template <typename F>
-  auto consume(F && f) -> option<return_wrapper_t<decltype(f(unwrap()))>>;
+  auto consume(F && f) -> option<return_wrapper_t<decltype(f(value()))>>;
 
 private:
   template <typename... Args>
@@ -298,9 +304,9 @@ constexpr option<T> option<T>::xor_(const option<T>& other) const noexcept
 
 template <typename T>
 template <typename F>
-auto option<T>::consume(F&& f) -> option<return_wrapper_t<decltype(f(unwrap()))>>
+auto option<T>::consume(F&& f) -> option<return_wrapper_t<decltype(f(value()))>>
 {
-  using R = return_wrapper<decltype(f(unwrap()))>;
+  using R = return_wrapper<decltype(f(value()))>;
   using U = typename R::type;
 
   if (is_some())
